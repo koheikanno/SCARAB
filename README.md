@@ -1,6 +1,8 @@
 # Stream Chasers Aircraft Design and Build
 * DAS and FPV system integration
+* Telemetry recording, payload drop, FPV, payload landing location overlay.
 * UI constructed with Glade
+* Since I started using git halfway through the development, the master branch is a mess.
 
 ## Prerequisites
 * ROS
@@ -17,6 +19,7 @@ Ubuntu 17.10 + ROS Lunar (ROS Lunar does NOT support Ubuntu 17.10 yet. I had ins
 * Open and close FPV window from the UI
 * Create a .launch file.
 * Clean up for readability
+* Clean up master branch
 * Classify stray functions
 * Modifiable CSV file, crosshair, FCU adresses
 * Check or create a new ROS package
