@@ -1,0 +1,8 @@
+prefix=/home/kohei/scarab/devel
+
+Name: das_fpv
+Description: Description of das_fpv
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/kohei/scarab/devel/lib 
+Requires: 

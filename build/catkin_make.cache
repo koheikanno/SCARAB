@@ -1,0 +1,2 @@
+das_fpv
+-DCATKIN_DEVEL_PREFIX=/home/kohei/scarab/devel -DCMAKE_INSTALL_PREFIX=/home/kohei/scarab/install -G Unix Makefiles
