@@ -10,8 +10,8 @@
 * OpenCV2
 * GTK+ 3
 
-## Tested environment
-Ubuntu 17.10 + ROS Lunar (ROS Lunar does NOT support Ubuntu 17.10 yet. I had installed ROS before I upgraded to 17.10 from 17.04.)
+## Test environment
+Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I had installed ROS before I upgraded to 17.10 from 17.04.)
 
 ## TODO:
 * Test the AUX1 PWM output with the modified [PX4 Firmware](https://github.com/koheikanno/Firmware) for payload drops.
