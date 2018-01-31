@@ -221,59 +221,59 @@ class MainWindow:
 		self.btn_payload_dialog_cncl = self.builder.get_object("btn_payload_dialog_cncl")
 		self.btn_payload_dialog_ok = self.builder.get_object("lbl_payload_dialog_ok")
 
-# What should I do with this....
-global initial_altitude, init_set
-initial_altitude = 0
-init_set = False
-
-def callback_vfr_hud(data):
-	telemetry = VFR_HUD()
-	global init_set, main_window, initial_altitude, logger, video_window
-	if init_set == False:
-		initial_altitude = data.altitude
-		init_set = True
-	# Convert to freedom units
-	feet = 3.28084 # ft/m
-	g = 32.174 # ft/s2
-	try:
-		telemetry.airspeed = data.airspeed * feet # ft/s
-		telemetry.groundspeed = data.groundspeed * feet # ft/s
-		telemetry.heading = data.heading # deg
-		telemetry.throttle = data.throttle * 100 # percent
-		telemetry.altitude = (data.altitude - initial_altitude) * feet # ft
-		telemetry.climb = data.climb * feet # ft/s
-		if telemetry.altitude > 0:
-			landing_time = (2 * telemetry.altitude / g)**0.5 # s
-			landing_length = telemetry.groundspeed * landing_time # ft
-		else:
-			landing_length = 0
-		main_window.set_telemetry(telemetry, landing_length)
+class FCU:
+	def callback_vfr_hud(self, data):
+		telemetry = VFR_HUD()
+		if self.init_set == False:
+			self.initial_altitude = data.altitude
+			self.init_set = True
+		# Convert to freedom units
+		feet = 3.28084 # ft/m
+		g = 32.174 # ft/s2
 		try:
-			if logger.writer_on == True:
-				logger.write_row(telemetry)
+			telemetry.airspeed = data.airspeed * feet # ft/s
+			telemetry.groundspeed = data.groundspeed * feet # ft/s
+			telemetry.heading = data.heading # deg
+			telemetry.throttle = data.throttle * 100 # percent
+			telemetry.altitude = (data.altitude - initial_altitude) * feet # ft
+			telemetry.climb = data.climb * feet # ft/s
+			if telemetry.altitude > 0:
+				landing_time = (2 * telemetry.altitude / g)**0.5 # s
+				landing_length = telemetry.groundspeed * landing_time # ft
+			else:
+				landing_length = 0
+			self.main_window.set_telemetry(telemetry, landing_length)
+			try:
+				if logger.writer_on == True:
+					logger.write_row(telemetry)
+			except Exception as e:
+				print(e)
+				pass
+			#video_window.update_loc(landing_length, 0, telemetry.altitude)
+		except Exception as e:
+			rospy.logerr(e)
+			pass
+
+	def callback_radiostatus(self, data):
+		try:
+			self.main_window.set_radio_status(data.rssi_dbm)
 		except Exception as e:
 			print(e)
 			pass
-		#video_window.update_loc(landing_length, 0, telemetry.altitude)
-		print(4321)
-	except Exception as e:
-		rospy.logerr(e)
-		pass
-
-def callback_radiostatus(data):
-	try:
-		global main_window
-		main_window.set_radio_status(data.rssi_dbm)
-	except Exception as e:
-		print(e)
-		pass
-	
-def listener():
-	rospy.init_node('listener', anonymous=True, log_level=rospy.DEBUG)
-	rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, callback_vfr_hud)
-	rospy.Subscriber("/mavros/radio_status", RadioStatus, callback_radiostatus)
-	rospy.spin()
-	print(5423)
+		
+	def listener(self):
+		rospy.init_node('listener', anonymous=True, log_level=rospy.DEBUG)
+		rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, self.callback_vfr_hud)
+		rospy.Subscriber("/mavros/radio_status", RadioStatus, self.callback_radiostatus)
+		rospy.spin()
+		
+	def __init__(self, main_window, video_window):
+		global logger
+		self.initial_altitude = 0
+		self.init_set = False
+		self.main_window = main_window
+		self.video_window = video_window
+		self.listener()
 
 if __name__ == "__main__":
 	main_window = MainWindow()
@@ -283,4 +283,4 @@ if __name__ == "__main__":
 	#video_window = Video()
 	#video_thread = threading.Thread(target=video_window.overlay())
 	#video_thread.start()
-	listener()
+	fcu = FCU(main_window, None)
