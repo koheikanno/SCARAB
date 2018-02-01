@@ -117,7 +117,7 @@ class MainWindow:
 	def on_main_window_destroy(self, object, data=None):
 		Gtk.main_quit()
 		print(2)
-	def on_main_window_delete_event(self):
+	def on_main_window_delete_event(self, object, data=None):
 		Gtk.main_quit()
 		print(3)
 	def on_reset_dialog_delete_event(self):
@@ -186,12 +186,13 @@ class MainWindow:
 		if self.btn_video_window.get_label() == "Open FPV Window":
 			global video_window
 			video_window = Video()
-			#video_thread = threading.Thread(target=video_window.overlay())
-			#video_thread.start()
+			video_thread = threading.Thread(target=video_window.overlay)
+			video_thread.start()
 
 			self.btn_video_window.set_label("Close FPV Window")
 		else:
 			cv2.destroyAllWindows()
+			video_window.video_capture.release()
 			self.btn_video_window.set_label("Open FPV Window")
 
 	def set_telemetry(self, data, landing_length):
