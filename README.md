@@ -29,9 +29,9 @@ Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I 
 * Modify px4.launch if necessary
   * $ roscd mavros/launch
   * $ sudo nano px4.launch
-  * In the line <arg name = "fcu_url" default="/dev/ttyUSB0:57600" />
-    * If connected to Pixhawk directly via USB, leave it as is.
-    * If connected to Pixhawk via 3DR Radio, change ttyUSB0:57600 to ttyACM0:57600
+  * In the line that looks like <arg name = "fcu_url" default="/dev/ttyUSB0:57600" />
+    * If connected to Pixhawk via 3DR Radio, leave it as is.
+    * If connected to Pixhawk directly via USB, change ttyUSB0:57600 to ttyACM0:57600
   * ^X to close nano. Make sure to save the buffer
 * $ roslaunch mavros px4.launch
 * Run src/das_fpv/src/telemetry.py for now. Proper ROS package to be added.
