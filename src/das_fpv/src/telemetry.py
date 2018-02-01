@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 
-# Copyright - Stream Chasers Aircraft Research and Build
-# Idk what this will become v0.3
-# 1/23/2018
+# Stream Chasers Aircraft Research and Build
+# 1/31/2018
 # Kohei Kanno, Andy Lee, Alex Lui, Neboneed Farhadi, Linwei Zhuo
 
 # Prerequisites
 # ROS, MAVROS, GTK, OpenCV2. UI designed with Glade. Tested on Ubuntu 17.10.
 
 # TODO
-# A lot of stuff here and there...
 # ^C doesn't kill process. ^D only kills the process but the window remains. ^\ finally
 # Implement air resistance to the calculation, lateral length
-# Maybe more telemetry info to show?
-# Brush up UI
-# Put all MAVROS stuff into a class
 
 import rospy, threading, csv
 from datetime import datetime
@@ -36,19 +31,40 @@ def run_gui_thread():
 
 class Video:
 	def update_loc(self, x, y, alt):
-		# ft -> pixel to be implemented here
-		# Assumptions: 4:3 640x480, 1 ft altitude -> 1 ft/480 px
+		# Called from callback_vfr_hud. Updates the overlaid landing location.
+		# ft -> pixel to be implemented here.
+		# Assumptions: 4:3 640x480, 1 ft altitude -> 1 ft/480 px. Camera
 		alt_pix = 1 / 480 # ft/px per foot of altitude
-		self.x = self.cam_height / 2 + x / alt_pix / alt
-		self.y = self.cam_width / 2 + y / alt_pix / alt
+		if alt > 0:
+			self.x = self.cam_height / 2 + x / alt_pix / alt
+			self.y = self.cam_width / 2 + y / alt_pix / alt
+		else:
+			self.x = self.cam_height / 2
+			self.y = self.cam_width / 2
 	def overlay(self):
 		while True:
 			ret, frame = self.video_capture.read()
-			roi = frame[(y - self.crosshair_height/2):(y + self.crosshair_height/2),(x - self.crosshair_width/2):(x + self.crosshair_width/2)]
+			y1 = self.y - self.crosshair_height / 2
+			y2 = self.y + self.crosshair_height / 2
+			if y1 < 0:
+				y2 = y2 - y1
+				y1 = 0
+			if y2 > self.cam_width:
+				y1 = y1 - (y2 - self.cam_width)
+				y2 = self.cam_width
+			x1 = self.x - self.crosshair_height / 2
+			x2 = self.x + self.crosshair_height / 2
+			if x1 < 0:
+				x2 = x2 - x1
+				x1 = 0
+			if x2 > self.cam_height:
+				x1 = x1 - (x2 - self.cam_height)
+				x2 = self.cam_height
+			roi = frame[y1:y2, x1:x2]
 			roi_bg = cv2.bitwise_and(roi, roi, mask = self.mask_inv)
 			roi_fg = cv2.bitwise_and(self.crosshair, self.crosshair, mask = self.mask)
 			dst = cv2.add(roi_bg, roi_fg)
-			frame[(y - self.crosshair_height/2):(y + self.crosshair_height/2),(x - self.crosshair_width/2):(x + self.crosshair_width/2)] = dst
+			frame[y1:y2, x1:x2] = dst
 			cv2.imshow('Video', frame)
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
@@ -62,14 +78,14 @@ class Video:
 		self.video_capture = cv2.VideoCapture(0)
 		ret, frame = self.video_capture.read()
 		self.cam_height, self.cam_width = frame.shape[:2]
-		self.crosshair_width = 128
-		self.crosshair_height = 128
+		self.crosshair_width = 64
+		self.crosshair_height = 64
 		self.crosshair = cv2.resize(self.img_crosshair, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask = cv2.resize(self.orig_mask, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask_inv = cv2.resize(self.orig_mask_inv, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		cv2.namedWindow('Video')
-		self.x = 0
-		self.y = 0
+		self.x = self.cam_width / 2
+		self.y = self.cam_height / 2
 
 class CSVWriter:
 	def write_row(self, telemetry):
@@ -166,6 +182,17 @@ class MainWindow:
 		self.lbl_payload_dialog.set_text("Are you sure you want to release Payload #2?")
 		self.actuator_payload = 1
 		self.payload_dialog.show()
+	def on_btn_video_window_clicked(self, btn_video_window_clicked):
+		if self.btn_video_window.get_label() == "Open FPV Window":
+			global video_window
+			video_window = Video()
+			#video_thread = threading.Thread(target=video_window.overlay())
+			#video_thread.start()
+
+			self.btn_video_window.set_label("Close FPV Window")
+		else:
+			cv2.destroyAllWindows()
+			self.btn_video_window.set_label("Open FPV Window")
 
 	def set_telemetry(self, data, landing_length):
 		try:
@@ -178,14 +205,14 @@ class MainWindow:
 			self.lbl_landing_length.set_text("%d ft" %landing_length)
 			self.current_altitude = data.altitude
 			print(1234)
-		except:
-			print(34567324567345763457)
+		except rospy.ROSInterruptException as e:
+			rospy.loggerr(e)
 			pass
 	def set_radio_status(self, rssi):
 		try:
-			self.lbl_rssi.set_text("%d dbm" %rssi)
-		except Exception as e:
-			print(e)
+			self.lbl_rssi.set_text("%d dBm" %rssi)
+		except rospy.ROSInterruptException as e:
+			rospy.loggerr(e)
 			pass
 	def __init__(self):
 		self.gladefile = "gui.glade"
@@ -209,6 +236,8 @@ class MainWindow:
 		self.btn_drop_payload1 = self.builder.get_object("btn_drop_payload1")
 		self.btn_reset_das = self.builder.get_object("btn_reset_das")
 		self.btn_record_telemetry.set_label("Record")
+		self.btn_video_window = self.builder.get_object("btn_video_window")
+		self.btn_video_window.set_label("Open FPV Window")
 		
 		self.reset_dialog = self.builder.get_object("reset_dialog")
 		self.reset_dialog.set_transient_for(self.window)
@@ -223,6 +252,7 @@ class MainWindow:
 
 class FCU:
 	def callback_vfr_hud(self, data):
+		global logger, video_window
 		telemetry = VFR_HUD()
 		if self.init_set == False:
 			self.initial_altitude = data.altitude
@@ -235,7 +265,7 @@ class FCU:
 			telemetry.groundspeed = data.groundspeed * feet # ft/s
 			telemetry.heading = data.heading # deg
 			telemetry.throttle = data.throttle * 100 # percent
-			telemetry.altitude = (data.altitude - initial_altitude) * feet # ft
+			telemetry.altitude = (data.altitude - self.initial_altitude) * feet # ft
 			telemetry.climb = data.climb * feet # ft/s
 			if telemetry.altitude > 0:
 				landing_time = (2 * telemetry.altitude / g)**0.5 # s
@@ -246,19 +276,23 @@ class FCU:
 			try:
 				if logger.writer_on == True:
 					logger.write_row(telemetry)
-			except Exception as e:
-				print(e)
+			except rospy.ROSInterruptException as e:
+				rospy.loggerr(e)
 				pass
-			#video_window.update_loc(landing_length, 0, telemetry.altitude)
-		except Exception as e:
-			rospy.logerr(e)
+			try:
+				video_window.update_loc(landing_length, 0, telemetry.altitude)
+			except rospy.ROSInterruptException as e:
+				rospy.loggerr(e)
+				pass
+		except rospy.ROSInterruptException as e:
+			rospy.loggerr(e)
 			pass
 
 	def callback_radiostatus(self, data):
 		try:
 			self.main_window.set_radio_status(data.rssi_dbm)
-		except Exception as e:
-			print(e)
+		except rospy.ROSInterruptException as e:
+			rospy.loggerr(e)
 			pass
 		
 	def listener(self):
@@ -268,7 +302,6 @@ class FCU:
 		rospy.spin()
 		
 	def __init__(self, main_window, video_window):
-		global logger
 		self.initial_altitude = 0
 		self.init_set = False
 		self.main_window = main_window
@@ -280,7 +313,4 @@ if __name__ == "__main__":
 	gui_thread = threading.Thread(target=run_gui_thread)
 	gui_thread.start()
 	gui_ready.wait()
-	#video_window = Video()
-	#video_thread = threading.Thread(target=video_window.overlay())
-	#video_thread.start()
 	fcu = FCU(main_window, None)
