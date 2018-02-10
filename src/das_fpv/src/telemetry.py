@@ -4,19 +4,16 @@
 # Copyright TBD
 
 # TODO
-# ^C doesn't kill process. ^D only kills the process but the window remains. ^\ finally
+# ^C doesn't kill process. ^D only kills the process but the window remains. ^\ finally kills it.
 
 import rospy, threading
-from mavros_msgs.msg import VFR_HUD, ActuatorControl, RadioStatus
+from mavros_msgs.msg import VFR_HUD, RadioStatus
 from mavros_msgs.srv import CommandLong
 
-from video import Video
-from csvwriter import CSVWriter
 from ui import MainWindow
 
 class FCU:
 	def callback_vfr_hud(self, data):
-		global logger, video_window
 		telemetry = VFR_HUD()
 		if self.init_set == False:
 			self.initial_altitude = data.altitude
@@ -38,13 +35,13 @@ class FCU:
 				landing_length = 0
 			self.main_window.set_telemetry(telemetry, landing_length)
 			try:
-				if logger.writer_on == True:
-					logger.write_row(telemetry)
+				if self.main_window.logger.writer_on == True:
+					self.main_window.logger.write_row(telemetry)
 			except rospy.ROSInterruptException as e:
 				rospy.loggerr(e)
 				pass
 			try:
-				video_window.update_loc(landing_length, 0, telemetry.altitude)
+				main_window.video_window.update_loc(landing_length, 0, telemetry.altitude)
 			except rospy.ROSInterruptException as e:
 				rospy.loggerr(e)
 				pass
@@ -58,18 +55,17 @@ class FCU:
 		except rospy.ROSInterruptException as e:
 			rospy.loggerr(e)
 			pass
-		
+
 	def listener(self):
 		rospy.init_node('listener', anonymous=True, log_level=rospy.DEBUG)
 		rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, self.callback_vfr_hud)
 		rospy.Subscriber("/mavros/radio_status", RadioStatus, self.callback_radiostatus)
 		rospy.spin()
-		
-	def __init__(self, main_window, video_window):
+
+	def __init__(self, main_window):
 		self.initial_altitude = 0
 		self.init_set = False
 		self.main_window = main_window
-		self.video_window = video_window
 		self.listener()
 
 if __name__ == "__main__":
@@ -78,4 +74,4 @@ if __name__ == "__main__":
 	gui_thread = threading.Thread(target=main_window.run_gui_thread)
 	gui_thread.start()
 	gui_ready.wait()
-	fcu = FCU(main_window, None)
+	fcu = FCU(main_window)

@@ -17,9 +17,10 @@ class CSVWriter:
 	def payload_drop(self, payload, time, altitude):
 		row = [payload, time, altitude]
 		self.writer.writerow(row)
-		
+
 	def btn_clicked(self):
 		if self.writer_on == False:
+			# file path should not be a constant
 			self.file_name = "/home/kohei/scarablogs/%s.csv" %datetime.now().strftime("%y%m%d_%H%M%S")
 			self.f = open(self.file_name, 'w')
 			self.writer = csv.writer(self.f)
@@ -29,6 +30,6 @@ class CSVWriter:
 			self.f.close()
 			self.writer_on = False
 			return False
-			
+
 	def __init__(self):
 		self.writer_on = False
