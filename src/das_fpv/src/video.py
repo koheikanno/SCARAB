@@ -29,7 +29,7 @@ class Video:
 			self.y = 0
 		if self.y > self.cam_height:
 			self.y = self.cam_height
-			
+
 	def overlay(self):
 		# This while loop runs continuously in a new thread while the video window is open
 		while True:
@@ -37,16 +37,19 @@ class Video:
 			# Define the range of interest, if it's outside the screen, crop the crosshair and overlay.
 			y1 = self.y - self.crosshair_height / 2
 			y2 = self.y + self.crosshair_height / 2
+			cropped = False
 			if y1 < 0:
 				crosshair = self.crosshair[self.crosshair_height + y1:self.crosshair_height, :]
 				mask = self.mask[self.crosshair_height + y1:self.crosshair_height, :]
 				mask_inv = self.mask_inv[self.crosshair_height + y1:self.crosshair_height, :]
 				y1 = 0
+				cropped = True
 			if y2 > self.cam_height:
 				crosshair = self.crosshair[0:self.crosshair_height - (y2 - self.cam_height), :]
 				mask = self.mask[0:self.crosshair_height - (y2 - self.cam_height), :]
 				mask_inv = self.mask_inv[0:self.crosshair_height - (y2 - self.cam_height), :]
 				y2 = self.cam_height
+				cropped = True
 			x1 = self.x - self.crosshair_width / 2
 			x2 = self.x + self.crosshair_width / 2
 			if x1 < 0:
@@ -54,14 +57,20 @@ class Video:
 				mask = self.mask[:, self.crosshair_width + x1:self.crosshair_width]
 				mask_inv = self.mask_inv[:, self.crosshair_width + x1:self.crosshair_width]
 				x1 = 0
+				cropped = True
 			if x2 > self.cam_width:
 				crosshair = self.crosshair[:, 0:self.crosshair_width - (x2 - self.cam_width)]
 				mask = self.mask[:, 0:self.crosshair_width - (x2 - self.cam_width)]
 				mask_inv = self.mask_inv[:, 0:self.crosshair_width - (x2 - self.cam_width)]
 				x2 = self.cam_width
+				cropped = True
 			roi = frame[y1:y2, x1:x2]
-			roi_bg = cv2.bitwise_and(roi, roi, mask = mask_inv)
-			roi_fg = cv2.bitwise_and(crosshair, crosshair, mask = mask)
+			if cropped:
+				roi_bg = cv2.bitwise_and(roi, roi, mask = mask_inv)
+				roi_fg = cv2.bitwise_and(crosshair, crosshair, mask = mask)
+			else:
+				roi_bg = cv2.bitwise_and(roi, roi, mask = self.mask_inv)
+				roi_fg = cv2.bitwise_and(self.crosshair, self.crosshair, mask = self.mask)				
 			dst = cv2.add(roi_bg, roi_fg)
 			frame[y1:y2, x1:x2] = dst
 			cv2.imshow('Video', frame)
