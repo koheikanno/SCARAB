@@ -54,25 +54,27 @@ class MainWindow:
 			pub = rospy.Publisher('/mavros/actuator_control', ActuatorControl, queue_size=3)
 			msg = ActuatorControl()
 			msg.header.frame_id = "payload_servo"
+			msg.group_mix = 3
 			if self.actuator_payload == 0:
-				msg.controls = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-				self.btn_drop_payload0.set_sensitive(False)
+				msg.controls[5] = 1.0
+				#self.btn_drop_payload0.set_sensitive(False)
 				self.payload0_drop_time = str(datetime.time(datetime.now()))
 				self.payload0_altitude = self.current_altitude
 				self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
 				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, self.payload0_altitude))
 			else:
-				msg.controls = [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0]
-				self.btn_drop_payload1.set_sensitive(False)
+				msg.controls[5] = -1.0
+				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))
 				self.payload1_altitude = self.current_altitude
 				self.logger.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
 				self.lbl_payload1_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload1_drop_time, self.payload1_altitude))
-			msg.group_mix = 3
-			pub.publish()
+			for i in range (0, 30):
+				pub.publish(msg)
 			self.payload_dialog.hide()
 		except rospy.ROSInterruptException as e:
 			rospy.loggerr(e)
+			pass
 
 	def on_btn_record_telemetry_clicked(self, btn_record_telemetry):
 		if self.btn_record_telemetry.get_label() == "Record":
@@ -131,7 +133,7 @@ class MainWindow:
 			rospy.loggerr(e)
 			pass
 			
-	def __init__(self, gui_ready, ):
+	def __init__(self, gui_ready):
 		self.gladefile = "gui.glade"
 		self.builder = Gtk.Builder()
 		self.builder.add_from_file(self.gladefile)
