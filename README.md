@@ -15,13 +15,8 @@
 Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I had installed ROS before I upgraded to 17.10 from 17.04.)
 
 ## TODO:
-* Test the AUX1 PWM output with the modified [PX4 Firmware](https://github.com/koheikanno/Firmware) for payload drops.
 * Brush up the UI.
-* Open and close FPV window from the UI
 * Create a .launch file.
-* Clean up for readability
-* Clean up master branch
-* Classify stray functions
 * Modifiable CSV file, crosshair, FCU adresses
 * Check or create a new ROS package
 
@@ -35,4 +30,4 @@ Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I 
     * If connected to Pixhawk directly via USB, change ttyUSB0:57600 to ttyACM0:57600
   * ^X to close nano. Make sure to save the buffer
 * $ roslaunch mavros px4.launch
-* Run src/das_fpv/src/telemetry.py for now. Proper ROS package to be added.
+* Run src/das_fpv/src/telemetry.py for now. Proper ROS package and .launch file to be created.
