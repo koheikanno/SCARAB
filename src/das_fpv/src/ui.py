@@ -61,14 +61,14 @@ class MainWindow:
 				self.payload0_drop_time = str(datetime.time(datetime.now()))
 				self.payload0_altitude = self.current_altitude
 				self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
-				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, self.payload0_altitude))
+				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(float('%.4g' %self.payload0_drop_time), float('%.4g' %self.payload0_altitude)))
 			else:
 				msg.controls[5] = -1.0
 				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))
 				self.payload1_altitude = self.current_altitude
 				self.logger.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
-				self.lbl_payload1_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload1_drop_time, self.payload1_altitude))
+				self.lbl_payload1_info.set_text("Drop Time: %s\n Altitude: %s ft" %(float('%.4g' %self.payload1_drop_time), float('%.4g' %self.payload1_altitude)))
 			for i in range (0, 30):
 				pub.publish(msg)
 			self.payload_dialog.hide()
