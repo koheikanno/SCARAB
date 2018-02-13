@@ -9,6 +9,7 @@
 * MAVROS
 * OpenCV2
 * GTK+ 3
+* PX4 MODIFIED Firmware - Make sure to add extras.txt in /etc of the uSD card
 
 ## Test environment
 Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I had installed ROS before I upgraded to 17.10 from 17.04.)
