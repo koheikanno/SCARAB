@@ -51,26 +51,22 @@ class MainWindow:
 
 	def on_btn_payload_dialog_ok_clicked(self, btn_payload_dialog_ok):
 		try:
-			pub = rospy.Publisher('/mavros/actuator_control', ActuatorControl, queue_size=3)
-			msg = ActuatorControl()
-			msg.header.frame_id = "payload_servo"
-			msg.group_mix = 3
 			if self.actuator_payload == 0:
-				msg.controls[5] = 1.0
+				self.msg.controls[5] = 1.0
 				#self.btn_drop_payload0.set_sensitive(False)
 				self.payload0_drop_time = str(datetime.time(datetime.now()))
 				self.payload0_altitude = self.current_altitude
 				self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
 				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, float('%.4g' %self.payload0_altitude)))
 			else:
-				msg.controls[5] = -1.0
+				self.msg.controls[5] = -1.0
 				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))
 				self.payload1_altitude = self.current_altitude
 				self.logger.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
 				self.lbl_payload1_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload1_drop_time, float('%.4g' %self.payload1_altitude)))
-			for i in range (0, 30):
-				pub.publish(msg)
+			for i in range (0, 10):
+				self.pub.publish(self.msg)
 			self.payload_dialog.hide()
 		except rospy.ROSInterruptException as e:
 			rospy.loggerr(e)
@@ -169,3 +165,11 @@ class MainWindow:
 		self.btn_payload_dialog_cncl = self.builder.get_object("btn_payload_dialog_cncl")
 		self.btn_payload_dialog_ok = self.builder.get_object("lbl_payload_dialog_ok")
 		self.gui_ready = gui_ready
+		
+		self.pub = rospy.Publisher('/mavros/actuator_control', ActuatorControl, queue_size=3)
+		self.msg = ActuatorControl()
+		self.msg.header.frame_id = "payload_servo"
+		self.msg.group_mix = 3
+		self.msg.controls[5] = 0.0
+		for i in range (0, 10):
+			self.pub.publish(self.msg)
