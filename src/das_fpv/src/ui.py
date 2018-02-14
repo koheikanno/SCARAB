@@ -170,6 +170,3 @@ class MainWindow:
 		self.msg = ActuatorControl()
 		self.msg.header.frame_id = "payload_servo"
 		self.msg.group_mix = 3
-		self.msg.controls[5] = 0.0
-		for i in range (0, 10):
-			self.pub.publish(self.msg)

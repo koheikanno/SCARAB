@@ -60,6 +60,8 @@ class FCU:
 		rospy.init_node('listener', anonymous=True, log_level=rospy.DEBUG)
 		rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, self.callback_vfr_hud)
 		rospy.Subscriber("/mavros/radio_status", RadioStatus, self.callback_radiostatus)
+		for i in range(0, 10):
+			self.main_window.pub.publish(self.main_window.msg)
 		rospy.spin()
 
 	def __init__(self, main_window):
