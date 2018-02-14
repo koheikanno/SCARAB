@@ -13,14 +13,14 @@ class Video:
 		# self.x and self.y are location in pixel on the video feed. The arguments x and y are distance in ft 
 		# ft -> pixel to be implemented here.
 		# Assumptions: 4:3 640x480, 1 ft altitude -> 1 ft/480 px. Camera pointed directly down.
-		alt_pix = 1 / 480 # ft/px per foot of altitude
+		alt_pix = 1. / 480 # ft/px per foot of altitude
 		if alt > 0:
-			self.x = self.cam_width / 2 + y / alt_pix / alt
-			self.y = self.cam_height / 2 + x / alt_pix / alt
+			self.x = int(self.cam_width / 2 + alt_pix * y * alt)
+			self.y = int(self.cam_height / 2 + alt_pix * x * alt)
 		else:
 			# if the reported altitude is less than 0, leave the initial location (center of the screen)
-			self.x = self.cam_width / 2
-			self.y = self.cam_height / 2
+			self.x = int(self.cam_width / 2)
+			self.y = int(self.cam_height / 2)
 		if self.x < 0:
 			self.x = 0
 		if self.x > self.cam_width:
@@ -39,9 +39,9 @@ class Video:
 			y2 = self.y + self.crosshair_height / 2
 			cropped = False
 			if y1 < 0:
-				crosshair = self.crosshair[self.crosshair_height + y1:self.crosshair_height, :]
-				mask = self.mask[self.crosshair_height + y1:self.crosshair_height, :]
-				mask_inv = self.mask_inv[self.crosshair_height + y1:self.crosshair_height, :]
+				crosshair = self.crosshair[-y1:self.crosshair_height, :]
+				mask = self.mask[-y1:self.crosshair_height, :]
+				mask_inv = self.mask_inv[-y1:self.crosshair_height, :]
 				y1 = 0
 				cropped = True
 			if y2 > self.cam_height:
@@ -53,9 +53,9 @@ class Video:
 			x1 = self.x - self.crosshair_width / 2
 			x2 = self.x + self.crosshair_width / 2
 			if x1 < 0:
-				crosshair = self.crosshair[:, self.crosshair_width + x1:self.crosshair_width]
-				mask = self.mask[:, self.crosshair_width + x1:self.crosshair_width]
-				mask_inv = self.mask_inv[:, self.crosshair_width + x1:self.crosshair_width]
+				crosshair = self.crosshair[:, -x1:self.crosshair_width]
+				mask = self.mask[:, -x1:self.crosshair_width]
+				mask_inv = self.mask_inv[:, -x1:self.crosshair_width]
 				x1 = 0
 				cropped = True
 			if x2 > self.cam_width:
@@ -85,12 +85,13 @@ class Video:
 		self.img_crosshair = self.img_crosshair[:,:,0:3]
 		self.video_capture = cv2.VideoCapture(0)
 		ret, frame = self.video_capture.read()
-		self.cam_height, self.cam_width = frame.shape[:2]
+		self.cam_height = int(frame.shape[:2][0])
+		self.cam_width = int(frame.shape[:2][1])
 		self.crosshair_width = 64
 		self.crosshair_height = 64
 		self.crosshair = cv2.resize(self.img_crosshair, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask = cv2.resize(self.orig_mask, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask_inv = cv2.resize(self.orig_mask_inv, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		cv2.namedWindow('Video')
-		self.x = self.cam_width / 2
-		self.y = self.cam_height / 2
+		self.x = int(self.cam_width / 2)
+		self.y = int(self.cam_height / 2)
