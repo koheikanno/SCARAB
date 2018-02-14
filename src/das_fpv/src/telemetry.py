@@ -8,6 +8,7 @@
 
 import rospy, threading
 from mavros_msgs.msg import VFR_HUD, RadioStatus
+from sensor_msgs.msg import BatteryState
 from mavros_msgs.srv import CommandLong
 
 from ui import MainWindow
@@ -56,10 +57,18 @@ class FCU:
 			rospy.loggerr(e)
 			pass
 
+	def callback_batterystate(self, data):
+		try:
+			self.main_window.set_battery_state(data.percentage * 100)
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
+
 	def listener(self):
 		rospy.init_node('listener', anonymous=True, log_level=rospy.DEBUG)
 		rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, self.callback_vfr_hud)
 		rospy.Subscriber("/mavros/radio_status", RadioStatus, self.callback_radiostatus)
+		rospy.Subscriber("/mavros/battery", BatteryState, self.callback_batterystate)
 		for i in range(0, 10):
 			self.main_window.pub.publish(self.main_window.msg)
 		rospy.spin()

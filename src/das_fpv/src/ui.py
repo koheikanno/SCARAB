@@ -128,6 +128,12 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.loggerr(e)
 			pass
+	def set_battery_state(self, percentage):
+		try:
+			self.lbl_bat_percent.set_text(str("%.1f" %percentage) + " %")
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
 			
 	def __init__(self, gui_ready):
 		self.gladefile = "gui.glade"
@@ -144,6 +150,7 @@ class MainWindow:
 		self.lbl_climb = self.builder.get_object("lbl_climb")
 		self.lbl_landing_length = self.builder.get_object("lbl_landing_length")
 		self.lbl_rssi = self.builder.get_object("lbl_rssi")
+		self.lbl_bat_percent = self.builder.get_object("lbl_bat_percent")
 		self.lbl_payload0_info = self.builder.get_object("lbl_payload0_info")
 		self.lbl_payload1_info = self.builder.get_object("lbl_payload1_info")
 		self.btn_record_telemetry = self.builder.get_object("btn_record_telemetry")
