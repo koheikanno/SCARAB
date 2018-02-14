@@ -2,32 +2,25 @@
 * DAS and FPV system integration
 * Telemetry recording, payload drop, FPV, payload landing location overlay.
 * UI constructed with Glade
-* Since I started using git halfway through the development, the master branch is a mess.
 
 ## Prerequisites
 * ROS
 * MAVROS
 * OpenCV2
 * GTK+ 3
-* PX4 MODIFIED Firmware - Make sure to add extras.txt in /etc of the uSD card
+* PX4 MODIFIED Firmware - Make sure to add extras.txt in /etc of the uSD card. The actuator control works outside the OFFBOARD mode as long as the FCU is armed.
 
 ## Test environment
 Ubuntu 17.10 + ROS Lunar 1.13.5 (ROS Lunar does NOT support Ubuntu 17.10 yet. I had installed ROS before I upgraded to 17.10 from 17.04.)
 
 ## TODO:
 * Brush up the UI.
-* Create a .launch file.
 * Modifiable CSV file, crosshair, FCU adresses
-* Check or create a new ROS package
 
 ## How do I start?
 * Plug in 3DR Radio or Pixhawk via USB
-* Modify px4.launch if necessary
-  * $ roscd mavros/launch
-  * $ sudo nano px4.launch
-  * In the line that looks like <arg name = "fcu_url" default="/dev/ttyUSB0:57600" />
-    * If connected to Pixhawk via 3DR Radio, leave it as is.
-    * If connected to Pixhawk directly via USB, change ttyUSB0:57600 to ttyACM0:57600
-  * ^X to close nano. Make sure to save the buffer
-* $ roslaunch mavros px4.launch
-* Run src/das_fpv/src/telemetry.py for now. Proper ROS package and .launch file to be created.
+* If connected via 3DR Radio:
+  * $ roslaunch das_fpv 3dr_radio.launch
+* If connected via USB:
+  * roslaunch das_fpv usb.launch
+* Issues still exist dealing with ^C, so just do what you need to do to kill the process...
