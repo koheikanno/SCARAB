@@ -11,6 +11,7 @@ from gi.repository import GObject, Gtk
 from csvwriter import CSVWriter
 from video import Video
 from mavros_msgs.msg import ActuatorControl
+from mavros_msgs.srv import CommandLong
 from datetime import datetime
 
 # Main window class initializes and the class methods that control the features
@@ -46,7 +47,7 @@ class MainWindow:
 		# Reboot FCU
 		rospy.wait_for_service('/mavros/cmd/command')
 		reset_srv = rospy.ServiceProxy('/mavros/cmd/command', CommandLong)
-		reset_srv(0, 246, 1, 1, 1, 0, 0, 0, 0, 0)
+		reset_srv(False, 246, 1, 1, 1, 0, 0, 0, 0, 0)
 		self.reset_dialog.hide()
 
 	def on_btn_payload_dialog_ok_clicked(self, btn_payload_dialog_ok):
@@ -59,7 +60,7 @@ class MainWindow:
 				self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
 				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, float('%.4g' %self.payload0_altitude)))
 			else:
-				self.msg.controls[5] = -1.0
+				self.msg.controls[6] = 1.0
 				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))
 				self.payload1_altitude = self.current_altitude
@@ -107,6 +108,47 @@ class MainWindow:
 			cv2.destroyAllWindows()
 			self.video_window.video_capture.release()
 			self.btn_video_window.set_label("Open FPV Window")
+			
+	def on_btn_pan_left_clicked(self, btn_pan_left):
+		try:
+			self.msg.controls[8] = self.msg.controls[8] - 10./90
+			if self.msg.controls[8] <= -1.0:
+				self.msg.controls[8] = -1.0
+			for i in range (0, 10):
+				self.pub.publish(self.msg)
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
+	def on_btn_pan_right_clicked(self, btn_pan_right):
+		try:
+			self.msg.controls[8] = self.msg.controls[8] + 10./90
+			if self.msg.controls[8] >= 1.0:
+				self.msg.controls[8] = 1.0
+			for i in range (0, 10):
+				self.pub.publish(self.msg)
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
+	def on_btn_tilt_up_clicked(self, btn_tilt_up):
+		try:
+			self.msg.controls[7] = self.msg.controls[7] + 10./90
+			if self.msg.controls[7] >= 1.0:
+				self.msg.controls[7] = 1.0
+			for i in range (0, 10):
+				self.pub.publish(self.msg)
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
+	def on_btn_tilt_down_clicked(self, btn_tilt_up):
+		try:
+			self.msg.controls[7] = self.msg.controls[7] - 10./90
+			if self.msg.controls[7] <= -1.0:
+				self.msg.controls[7] = -1.0
+			for i in range (0, 10):
+				self.pub.publish(self.msg)
+		except rospy.ROSInterruptException as e:
+			rospy.logerr(e)
+			pass
 
 	def set_telemetry(self, data, landing_length):
 		try:
@@ -172,6 +214,11 @@ class MainWindow:
 		self.btn_payload_dialog_cncl = self.builder.get_object("btn_payload_dialog_cncl")
 		self.btn_payload_dialog_ok = self.builder.get_object("lbl_payload_dialog_ok")
 		self.gui_ready = gui_ready
+		
+		self.btn_pan_left = self.builder.get_object("btn_pan_left")
+		self.btn_pan_right = self.builder.get_object("btn_pan_right")
+		self.btn_tilt_up = self.builder.get_object("btn_tilt_up")
+		self.btn_tilt_down = self.builder.get_object("btn_tilt_down")
 		
 		self.pub = rospy.Publisher('/mavros/actuator_control', ActuatorControl, queue_size=3)
 		self.msg = ActuatorControl()
