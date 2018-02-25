@@ -24,6 +24,8 @@ class Video:
 			# if the reported altitude is less than 0, leave the initial location (center of the screen)
 			phi = 0
 			psi = 0
+		phi = phi - math.radians(self.tilt_angle)
+		psi = psi - math.radians(self.pan_angle)
 		self.x = int(self.cam_width / 2 + psi * self.px_w_angle)
 		self.y = int(self.cam_height / 2 + phi * self.px_h_angle)
 		if self.x < 0:
@@ -82,8 +84,14 @@ class Video:
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
 				cv2.destroyAllWindows()
-
-	def __init__(self):
+				
+	def set_tilt_angle(self, deg):
+		self.tilt_angle = deg
+		
+	def set_pan_angle(self, deg):
+		self.pan_angle = deg
+		
+	def __init__(self, tilt, pan):
 		self.img_crosshair = cv2.imread('/home/kohei/crosshair.png', -1)
 		self.orig_mask = self.img_crosshair[:,:,3]
 		self.orig_mask_inv = cv2.bitwise_not(self.orig_mask)
@@ -106,3 +114,5 @@ class Video:
 		cv2.namedWindow('Video')
 		self.x = int(self.cam_width / 2)
 		self.y = int(self.cam_height / 2)
+		self.tilt_angle = math.radians(tilt)
+		self.pan_angle = math.radians(pan)

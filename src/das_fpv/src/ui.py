@@ -100,7 +100,7 @@ class MainWindow:
 
 	def on_btn_video_window_clicked(self, btn_video_window_clicked):
 		if self.btn_video_window.get_label() == "Open FPV Window":
-			self.video_window = Video()
+			self.video_window = Video(self.msg.controls[7] / 90., 0)
 			video_thread = threading.Thread(target=self.video_window.overlay)
 			video_thread.start()
 			self.btn_video_window.set_label("Close FPV Window")
@@ -116,6 +116,7 @@ class MainWindow:
 				self.msg.controls[8] = -1.0
 			for i in range (0, 10):
 				self.pub.publish(self.msg)
+			self.video_window.set_pan_angle(self.msg.controls[8] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
@@ -126,6 +127,7 @@ class MainWindow:
 				self.msg.controls[8] = 1.0
 			for i in range (0, 10):
 				self.pub.publish(self.msg)
+			self.video_window.set_pan_angle(self.msg.controls[8] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
@@ -136,6 +138,7 @@ class MainWindow:
 				self.msg.controls[7] = 1.0
 			for i in range (0, 10):
 				self.pub.publish(self.msg)
+			self.video_window.set_tilt_angle(self.msg.controls[7] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
@@ -146,6 +149,7 @@ class MainWindow:
 				self.msg.controls[7] = -1.0
 			for i in range (0, 10):
 				self.pub.publish(self.msg)
+			self.video_window.set_tilt_angle(self.msg.controls[7] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
