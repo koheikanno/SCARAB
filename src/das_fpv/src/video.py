@@ -92,7 +92,7 @@ class Video:
 		self.pan_angle = deg
 		
 	def __init__(self, tilt, pan):
-		self.img_crosshair = cv2.imread('/home/kohei/crosshair.png', -1)
+		self.img_crosshair = cv2.imread('/home/kohei/scarab/crosshair.png', -1)
 		self.orig_mask = self.img_crosshair[:,:,3]
 		self.orig_mask_inv = cv2.bitwise_not(self.orig_mask)
 		self.img_crosshair = self.img_crosshair[:,:,0:3]
