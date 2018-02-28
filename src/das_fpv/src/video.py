@@ -26,8 +26,8 @@ class Video:
 			psi = 0
 		phi = phi - math.radians(self.tilt_angle)
 		psi = psi - math.radians(self.pan_angle)
-		self.x = int(self.cam_width / 2 + psi * self.px_w_angle)
-		self.y = int(self.cam_height / 2 + phi * self.px_h_angle)
+		self.x = int(self.cam_width / 2 + psi * self.px_horiz_angle)
+		self.y = int(self.cam_height / 2 + phi * self.px_vert_angle)
 		if self.x < 0:
 			self.x = 0
 		if self.x > self.cam_width:
@@ -102,10 +102,10 @@ class Video:
 		self.cam_width = int(frame.shape[:2][1])
 		# Assumed 120 deg horizontal angle of view, 90 deg vertical angle of view
 		# no distortion
-		self.cam_height_angle = math.radians(120) # rad
-		self.cam_width_angle = math.radians(90) # rad 
-		self.px_h_angle = self.cam_height / self.cam_height_angle # px / rad
-		self.px_w_angle = self.cam_width / self.cam_width_angle # px / rad
+		self.cam_vert_angle = math.radians(109.69) # rad
+		self.cam_horiz_angle = math.radians(124.32) # rad 
+		self.px_vert_angle = self.cam_height / self.cam_vert_angle # px / rad
+		self.px_horiz_angle = self.cam_width / self.cam_horiz_angle # px / rad
 		self.crosshair_width = 64
 		self.crosshair_height = 64
 		self.crosshair = cv2.resize(self.img_crosshair, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
