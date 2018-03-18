@@ -103,7 +103,7 @@ class Video:
 		self.resized_height = int(frame.shape[:2][0] * 1.5)
 		self.resized_width = int(frame.shape[:2][1] * 1.5)
 		frame = cv2.resize(frame, (self.resized_width, self.resized_height), interpolation = cv2.INTER_AREA)
-		frame = cv2.resize(frame, 0)
+		frame = cv2.flip(frame, 0)
 		# Assumed 120 deg horizontal angle of view, 90 deg vertical angle of view
 		# no distortion
 		self.cam_vert_angle = math.radians(109.69) # rad
