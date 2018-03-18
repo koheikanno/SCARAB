@@ -42,6 +42,7 @@ class Video:
 		while True:
 			ret, frame = self.video_capture.read()
 			frame = cv2.resize(frame, (1024, 768), interpolation = cv2.INTER_AREA)
+			frame = cv2.flip(frame, 0)
 			# Define the range of interest, if it's outside the screen, crop the crosshair and overlay.
 			y1 = self.y - self.crosshair_height / 2
 			y2 = self.y + self.crosshair_height / 2
@@ -100,6 +101,7 @@ class Video:
 		self.video_capture = cv2.VideoCapture(0)
 		ret, frame = self.video_capture.read()
 		frame = cv2.resize(frame, (1024, 768), interpolation = cv2.INTER_AREA)
+		frame = cv2.resize(frame, 0)
 		self.cam_height = int(frame.shape[:2][0])
 		self.cam_width = int(frame.shape[:2][1])
 		# Assumed 120 deg horizontal angle of view, 90 deg vertical angle of view
