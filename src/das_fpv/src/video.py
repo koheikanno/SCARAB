@@ -26,22 +26,22 @@ class Video:
 			psi = 0
 		phi = phi - math.radians(self.tilt_angle)
 		psi = psi - math.radians(self.pan_angle)
-		self.x = int(self.cam_width / 2 + psi * self.px_horiz_angle)
-		self.y = int(self.cam_height / 2 + phi * self.px_vert_angle)
+		self.x = int(self.resized_width / 2 + psi * self.px_horiz_angle)
+		self.y = int(self.resized_height / 2 + phi * self.px_vert_angle)
 		if self.x < 0:
 			self.x = 0
-		if self.x > self.cam_width:
-			self.x = self.cam_width
+		if self.x > self.resized_width:
+			self.x = self.resized_width
 		if self.y < 0:
 			self.y = 0
-		if self.y > self.cam_height:
-			self.y = self.cam_height
+		if self.y > self.resized_height:
+			self.y = self.resized_height
 
 	def overlay(self):
 		# This while loop runs continuously in a new thread while the video window is open
 		while True:
 			ret, frame = self.video_capture.read()
-			frame = cv2.resize(frame, (1024, 768), interpolation = cv2.INTER_AREA)
+			frame = cv2.resize(frame, (self.resized_width, self.resized_height), interpolation = cv2.INTER_AREA)
 			frame = cv2.flip(frame, 0)
 			# Define the range of interest, if it's outside the screen, crop the crosshair and overlay.
 			y1 = self.y - self.crosshair_height / 2
@@ -53,11 +53,11 @@ class Video:
 				mask_inv = self.mask_inv[-y1:self.crosshair_height, :]
 				y1 = 0
 				cropped = True
-			if y2 > self.cam_height:
-				crosshair = self.crosshair[0:self.crosshair_height - (y2 - self.cam_height), :]
-				mask = self.mask[0:self.crosshair_height - (y2 - self.cam_height), :]
-				mask_inv = self.mask_inv[0:self.crosshair_height - (y2 - self.cam_height), :]
-				y2 = self.cam_height
+			if y2 > self.resized_height:
+				crosshair = self.crosshair[0:self.crosshair_height - (y2 - self.resized_height), :]
+				mask = self.mask[0:self.crosshair_height - (y2 - self.resized_height), :]
+				mask_inv = self.mask_inv[0:self.crosshair_height - (y2 - self.resized_height), :]
+				y2 = self.resized_height
 				cropped = True
 			x1 = self.x - self.crosshair_width / 2
 			x2 = self.x + self.crosshair_width / 2
@@ -67,11 +67,11 @@ class Video:
 				mask_inv = self.mask_inv[:, -x1:self.crosshair_width]
 				x1 = 0
 				cropped = True
-			if x2 > self.cam_width:
-				crosshair = self.crosshair[:, 0:self.crosshair_width - (x2 - self.cam_width)]
-				mask = self.mask[:, 0:self.crosshair_width - (x2 - self.cam_width)]
-				mask_inv = self.mask_inv[:, 0:self.crosshair_width - (x2 - self.cam_width)]
-				x2 = self.cam_width
+			if x2 > self.resized_width:
+				crosshair = self.crosshair[:, 0:self.crosshair_width - (x2 - self.resized_width)]
+				mask = self.mask[:, 0:self.crosshair_width - (x2 - self.resized_width)]
+				mask_inv = self.mask_inv[:, 0:self.crosshair_width - (x2 - self.resized_width)]
+				x2 = self.resized_width
 				cropped = True
 			roi = frame[y1:y2, x1:x2]
 			if cropped:
@@ -100,23 +100,23 @@ class Video:
 		self.img_crosshair = self.img_crosshair[:,:,0:3]
 		self.video_capture = cv2.VideoCapture(0)
 		ret, frame = self.video_capture.read()
-		frame = cv2.resize(frame, (1024, 768), interpolation = cv2.INTER_AREA)
+		self.resized_height = int(frame.shape[:2][0] * 1.5)
+		self.resized_width = int(frame.shape[:2][1] * 1.5)
+		frame = cv2.resize(frame, (self.resized_width, self.resized_height), interpolation = cv2.INTER_AREA)
 		frame = cv2.resize(frame, 0)
-		self.cam_height = int(frame.shape[:2][0])
-		self.cam_width = int(frame.shape[:2][1])
 		# Assumed 120 deg horizontal angle of view, 90 deg vertical angle of view
 		# no distortion
 		self.cam_vert_angle = math.radians(109.69) # rad
 		self.cam_horiz_angle = math.radians(124.32) # rad 
-		self.px_vert_angle = self.cam_height / self.cam_vert_angle # px / rad
-		self.px_horiz_angle = self.cam_width / self.cam_horiz_angle # px / rad
+		self.px_vert_angle = self.resized_height / self.cam_vert_angle # px / rad
+		self.px_horiz_angle = self.resized_width / self.cam_horiz_angle # px / rad
 		self.crosshair_width = 64
 		self.crosshair_height = 64
 		self.crosshair = cv2.resize(self.img_crosshair, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask = cv2.resize(self.orig_mask, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		self.mask_inv = cv2.resize(self.orig_mask_inv, (self.crosshair_width, self.crosshair_height), interpolation = cv2.INTER_AREA)
 		cv2.namedWindow('Video')
-		self.x = int(self.cam_width / 2)
-		self.y = int(self.cam_height / 2)
+		self.x = int(self.resized_width / 2)
+		self.y = int(self.resized_height / 2)
 		self.tilt_angle = math.radians(tilt)
 		self.pan_angle = math.radians(pan)
