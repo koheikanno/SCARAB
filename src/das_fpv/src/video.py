@@ -5,7 +5,7 @@
 
 # FPV/Video Overlay Integration
 
-import cv2, math
+import cv2, math, time
 
 class Video:
 	def update_loc(self, dist, div, alt):
@@ -82,6 +82,13 @@ class Video:
 				roi_fg = cv2.bitwise_and(self.crosshair, self.crosshair, mask = self.mask)				
 			dst = cv2.add(roi_bg, roi_fg)
 			frame[y1:y2, x1:x2] = dst
+			
+			if self.show_drop_info == True:
+				text_payloa
+				cv2.putText(frame, self.payload_drop_text, (512, 512), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+				if time.time() - self.show_time > 5:
+					self.show_drop_info = False
+			
 			cv2.imshow('Video', frame)
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
@@ -92,6 +99,11 @@ class Video:
 		
 	def set_pan_angle(self, deg):
 		self.pan_angle = deg
+		
+	def payload_drop(self, payload, drop_time, alt):
+		self.payload_drop_text = "Payload %i dropped at %s from %s ft" % (payload, drop_time, alt)
+		self.show_time = time.time()
+		self.show_drop_info = True
 		
 	def __init__(self, tilt, pan):
 		self.img_crosshair = cv2.imread('/home/kohei/scarab/crosshair.png', -1)
