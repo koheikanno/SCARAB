@@ -6,6 +6,7 @@
 # FPV/Video Overlay Integration
 
 import cv2, math, time
+from datetime import datetime
 
 class Video:
 	def update_loc(self, dist, div, alt):
@@ -89,6 +90,8 @@ class Video:
 				if time.time() - self.show_time > 5:
 					self.show_drop_info = False
 			
+			if self.video_writer_on == True:
+				self.out.write(frame)
 			cv2.imshow('Video', frame)
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
@@ -104,6 +107,14 @@ class Video:
 		self.payload_drop_text = "Payload %i dropped at %s from %s ft" % (payload, drop_time, alt)
 		self.show_time = time.time()
 		self.show_drop_info = True
+		
+	def start_video_record(self):
+		video_file_name = "/home/kohei/scarablogs/%s.avi" %datetime.now().strftime("%y%m%d_%H%M%S")
+		self.out = cv2.VideoWriter(video_file_name, self.fourcc, 30., (self.resized_width, self.resized_height)) 
+		self.video_writer_on = True
+		
+	def stop_video_record(self):
+		self.video_writer_on = False
 		
 	def __init__(self, tilt, pan):
 		self.img_crosshair = cv2.imread('/home/kohei/scarab/crosshair.png', -1)
@@ -132,3 +143,5 @@ class Video:
 		self.y = int(self.resized_height / 2)
 		self.tilt_angle = math.radians(tilt)
 		self.pan_angle = math.radians(pan)
+		self.video_writer_on = False
+		self.fourcc = cv2.VideoWriter_fourcc(*'H264')

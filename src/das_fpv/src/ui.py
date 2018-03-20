@@ -76,13 +76,13 @@ class MainWindow:
 			pass
 
 	def on_btn_record_telemetry_clicked(self, btn_record_telemetry):
-		if self.btn_record_telemetry.get_label() == "Record":
+		if self.btn_record_telemetry.get_label() == "Record Telemetry":
 			self.logger = CSVWriter()
 			if self.logger.btn_clicked() == True:
-				self.btn_record_telemetry.set_label("Stop")
+				self.btn_record_telemetry.set_label("Stop Recording Telemetry")
 		else:
 			if self.logger.btn_clicked() == False:
-				self.btn_record_telemetry.set_label("Record")
+				self.btn_record_telemetry.set_label("Record Telemetry")
 		
 	def on_btn_reset_das_clicked(self, btn_reset_das_clicked):
 		self.reset_dialog.show()
@@ -155,6 +155,13 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
+	def on_btn_record_video_clicked(self, btn_record_video):
+		if self.btn_record_video.get_label() == "Record Video":
+			self.video_window.start_video_record()
+			self.btn_record_video.set_label("Stop Recording Video")
+		else:
+			self.video_window.stop_video_record()
+			self.btn_record_video.set_label("Record Video")
 
 	def set_telemetry(self, data, landing_length):
 		try:
@@ -205,9 +212,11 @@ class MainWindow:
 		self.btn_drop_payload0 = self.builder.get_object("btn_drop_payload0")
 		self.btn_drop_payload1 = self.builder.get_object("btn_drop_payload1")
 		self.btn_reset_das = self.builder.get_object("btn_reset_das")
-		self.btn_record_telemetry.set_label("Record")
+		self.btn_record_telemetry.set_label("Record Telemetry")
 		self.btn_video_window = self.builder.get_object("btn_video_window")
 		self.btn_video_window.set_label("Open FPV Window")
+		self.btn_record_video = self.builder.get_object("btn_record_video")
+		self.btn_record_video.set_label("Record Video")
 
 		self.reset_dialog = self.builder.get_object("reset_dialog")
 		self.reset_dialog.set_transient_for(self.window)
