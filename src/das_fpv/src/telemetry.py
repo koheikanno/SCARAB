@@ -42,7 +42,7 @@ class FCU:
 				rospy.loggerr(e)
 				pass
 			try:
-				main_window.video_window.update_loc(landing_length, 0, telemetry.altitude)
+				main_window.video_window.update_loc(landing_length, 0, telemetry.altitude, telemetry.airspeed)
 			except rospy.ROSInterruptException as e:
 				rospy.loggerr(e)
 				pass

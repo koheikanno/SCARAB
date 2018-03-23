@@ -9,7 +9,7 @@ import cv2, math, time
 from datetime import datetime
 
 class Video:
-	def update_loc(self, dist, div, alt):
+	def update_loc(self, dist, div, alt, speed):
 		# Called from callback_vfr_hud. Updates the overlaid landing location.
 		# self.x and self.y are location in pixel on the video feed. The arguments x and y are distance in ft 
 		# ft -> pixel to be implemented here.
@@ -37,6 +37,9 @@ class Video:
 			self.y = 0
 		if self.y > self.resized_height:
 			self.y = self.resized_height
+		
+		self.speed_text = "%d KTS" % speed
+		self.altitude_text  = "%d FT" % alt
 
 	def overlay(self):
 		# This while loop runs continuously in a new thread while the video window is open
@@ -83,10 +86,11 @@ class Video:
 				roi_fg = cv2.bitwise_and(self.crosshair, self.crosshair, mask = self.mask)				
 			dst = cv2.add(roi_bg, roi_fg)
 			frame[y1:y2, x1:x2] = dst
-			
+			cv2.putText(frame, datetime.now().strftime("%m/%d/%y %H:%M:%S"), (512, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+			cv2.putText(frame, self.speed_text, (128, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+			cv2.putText(frame, self.altitude_text, (256, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
 			if self.show_drop_info == True:
-				text_payloa
-				cv2.putText(frame, self.payload_drop_text, (512, 512), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+				cv2.putText(frame, self.payload_drop_text, (128, 128), self.font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 				if time.time() - self.show_time > 5:
 					self.show_drop_info = False
 			
@@ -96,7 +100,7 @@ class Video:
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
 				cv2.destroyAllWindows()
-				
+
 	def set_tilt_angle(self, deg):
 		self.tilt_angle = deg
 		
@@ -145,3 +149,7 @@ class Video:
 		self.pan_angle = math.radians(pan)
 		self.video_writer_on = False
 		self.fourcc = cv2.VideoWriter_fourcc(*'H264')
+		self.font = cv2.FONT_HERSHEY_SIMPLEX
+		self.speed_text = "0 KTS"
+		self.altitude_text = "0 FT"
+		self.show_drop_info = False

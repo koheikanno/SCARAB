@@ -53,20 +53,28 @@ class MainWindow:
 	def on_btn_payload_dialog_ok_clicked(self, btn_payload_dialog_ok):
 		try:
 			if self.actuator_payload == 0:
-				self.msg.controls[5] = 1.0
+				self.msg.controls[5] = -1.0
 				#self.btn_drop_payload0.set_sensitive(False)
 				self.payload0_drop_time = str(datetime.time(datetime.now()))[:-4]
 				self.payload0_altitude = self.current_altitude
-				self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
-				self.video_window.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
+				try:
+					self.logger.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
+					self.video_window.payload_drop(0, self.payload0_drop_time, self.payload0_altitude)
+				except rospy.ROSInterruptException as e:
+					rospy.logerr(e)
+					pass
 				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, float('%.4g' %self.payload0_altitude)))
 			else:
 				self.msg.controls[6] = 1.0
 				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))[:-4]
 				self.payload1_altitude = self.current_altitude
-				self.logger.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
-				self.video_window.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
+				try:
+					self.logger.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
+					self.video_window.payload_drop(1, self.payload1_drop_time, self.payload1_altitude)
+				except rospy.ROSInterruptException as e:
+					rospy.logerr(e)
+					pass
 				self.lbl_payload1_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload1_drop_time, float('%.4g' %self.payload1_altitude)))
 			for i in range (0, 10):
 				self.pub.publish(self.msg)
@@ -133,6 +141,7 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
+			
 	def on_btn_tilt_up_clicked(self, btn_tilt_up):
 		try:
 			self.msg.controls[7] = self.msg.controls[7] + 10./90
@@ -144,6 +153,7 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
+			
 	def on_btn_tilt_down_clicked(self, btn_tilt_up):
 		try:
 			self.msg.controls[7] = self.msg.controls[7] - 10./90
@@ -155,6 +165,7 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
 			pass
+			
 	def on_btn_record_video_clicked(self, btn_record_video):
 		if self.btn_record_video.get_label() == "Record Video":
 			self.video_window.start_video_record()
@@ -183,6 +194,7 @@ class MainWindow:
 		except rospy.ROSInterruptException as e:
 			rospy.loggerr(e)
 			pass
+			
 	def set_battery_state(self, percentage):
 		try:
 			self.lbl_bat_percent.set_text(str("%.1f" %percentage) + " %")
