@@ -53,7 +53,7 @@ class MainWindow:
 	def on_btn_payload_dialog_ok_clicked(self, btn_payload_dialog_ok):
 		try:
 			if self.actuator_payload == 0:
-				self.msg.controls[5] = 0.8
+				self.msg.controls[5] = 0.5
 				#self.btn_drop_payload0.set_sensitive(False)
 				self.payload0_drop_time = str(datetime.time(datetime.now()))[:-4]
 				self.payload0_altitude = self.current_altitude
@@ -65,7 +65,7 @@ class MainWindow:
 					pass
 				self.lbl_payload0_info.set_text("Drop Time: %s\n Altitude: %s ft" %(self.payload0_drop_time, float('%.4g' %self.payload0_altitude)))
 			else:
-				self.msg.controls[6] = -0.8
+				self.msg.controls[6] = -0.5
 				#self.btn_drop_payload1.set_sensitive(False)
 				self.payload1_drop_time = str(datetime.time(datetime.now()))[:-4]
 				self.payload1_altitude = self.current_altitude
@@ -121,37 +121,13 @@ class MainWindow:
 			self.video_window.video_capture.release()
 			self.btn_video_window.set_label("Open FPV Window")
 			
-	def on_btn_pan_left_clicked(self, btn_pan_left):
-		try:
-			self.msg.controls[8] = self.msg.controls[8] - 10./90
-			if self.msg.controls[8] <= -1.0:
-				self.msg.controls[8] = -1.0
-			for i in range (0, 10):
-				self.pub.publish(self.msg)
-			self.video_window.set_pan_angle(self.msg.controls[8] / 90.)
-		except rospy.ROSInterruptException as e:
-			rospy.logerr(e)
-			pass
-			
-	def on_btn_pan_right_clicked(self, btn_pan_right):
-		try:
-			self.msg.controls[8] = self.msg.controls[8] + 10./90
-			if self.msg.controls[8] >= 1.0:
-				self.msg.controls[8] = 1.0
-			for i in range (0, 10):
-				self.pub.publish(self.msg)
-			self.video_window.set_pan_angle(self.msg.controls[8] / 90.)
-		except rospy.ROSInterruptException as e:
-			rospy.logerr(e)
-			pass
-			
 	def on_btn_tilt_up_clicked(self, btn_tilt_up):
 		try:
 			self.msg.controls[7] = self.msg.controls[7] + 10./90
 			if self.msg.controls[7] >= 1.0:
 				self.msg.controls[7] = 1.0
-			for i in range (0, 10):
-				self.pub.publish(self.msg)
+			self.msg.header.stamp = rospy.Time.now()
+			self.pub.publish(self.msg)
 			self.video_window.set_tilt_angle(self.msg.controls[7] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
@@ -162,8 +138,8 @@ class MainWindow:
 			self.msg.controls[7] = self.msg.controls[7] - 10./90
 			if self.msg.controls[7] <= -1.0:
 				self.msg.controls[7] = -1.0
-			for i in range (0, 10):
-				self.pub.publish(self.msg)
+			self.msg.header.stamp = rospy.Time.now()
+			self.pub.publish(self.msg)
 			self.video_window.set_tilt_angle(self.msg.controls[7] / 90.)
 		except rospy.ROSInterruptException as e:
 			rospy.logerr(e)
@@ -245,8 +221,6 @@ class MainWindow:
 		self.btn_payload_dialog_ok = self.builder.get_object("lbl_payload_dialog_ok")
 		self.gui_ready = gui_ready
 		
-		self.btn_pan_left = self.builder.get_object("btn_pan_left")
-		self.btn_pan_right = self.builder.get_object("btn_pan_right")
 		self.btn_tilt_up = self.builder.get_object("btn_tilt_up")
 		self.btn_tilt_down = self.builder.get_object("btn_tilt_down")
 		
