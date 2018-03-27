@@ -69,8 +69,8 @@ class FCU:
 		rospy.Subscriber("/mavros/vfr_hud", VFR_HUD, self.callback_vfr_hud)
 		rospy.Subscriber("/mavros/radio_status", RadioStatus, self.callback_radiostatus)
 		rospy.Subscriber("/mavros/battery", BatteryState, self.callback_batterystate)
-		for i in range(0, 10):
-			self.main_window.pub.publish(self.main_window.msg)
+		self.main_window.msg.header.stamp = rospy.Time.now()
+		self.main_window.pub.publish(self.main_window.msg)
 		rospy.spin()
 
 	def __init__(self, main_window):

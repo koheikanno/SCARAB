@@ -38,7 +38,7 @@ class Video:
 		if self.y > self.resized_height:
 			self.y = self.resized_height
 		
-		self.speed_text = "%d KTS" % speed
+		self.speed_text = "%d FT/S" % speed
 		self.altitude_text  = "%d FT" % alt
 
 	def overlay(self):
@@ -150,6 +150,6 @@ class Video:
 		self.video_writer_on = False
 		self.fourcc = cv2.VideoWriter_fourcc(*'H264')
 		self.font = cv2.FONT_HERSHEY_SIMPLEX
-		self.speed_text = "0 KTS"
+		self.speed_text = "0 FT/S"
 		self.altitude_text = "0 FT"
 		self.show_drop_info = False
