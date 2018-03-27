@@ -86,11 +86,11 @@ class Video:
 				roi_fg = cv2.bitwise_and(self.crosshair, self.crosshair, mask = self.mask)				
 			dst = cv2.add(roi_bg, roi_fg)
 			frame[y1:y2, x1:x2] = dst
-			cv2.putText(frame, datetime.now().strftime("%m/%d/%y %H:%M:%S"), (512, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
-			cv2.putText(frame, self.speed_text, (128, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
-			cv2.putText(frame, self.altitude_text, (256, 512), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+			cv2.putText(frame, datetime.now().strftime("%m/%d/%y %H:%M:%S"), (512, self.resized_height - 32), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+			cv2.putText(frame, self.speed_text, (128, self.resized_height - 32), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
+			cv2.putText(frame, self.altitude_text, (256, self.resized_height - 32), self.font, 0.7, (0, 255, 0), 1, cv2.LINE_AA)
 			if self.show_drop_info == True:
-				cv2.putText(frame, self.payload_drop_text, (128, 128), self.font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+				cv2.putText(frame, self.payload_drop_text, (64, 64), self.font, 1, (0, 255, 0), 2, cv2.LINE_AA)
 				if time.time() - self.show_time > 5:
 					self.show_drop_info = False
 			
